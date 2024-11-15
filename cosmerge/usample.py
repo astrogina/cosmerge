@@ -39,7 +39,7 @@ def md_zs(sfr_model, z_max):
         yield redshifts
 
 
-def draw_metallicities_and_redshifts(mets, ns, Ns, sfr_model, sigma_log10Z, z_max):
+def draw_metallicities_and_redshifts(mets, ns, Ns, sfr_model, z_max, skew=False, **kwargs):
     """Generator for draws of formation metallicities and redshifts from a
     log-normal metallicity distribution based on Madau & Fragos (2017)
     from the sfh module and a user specified star formation rate model
@@ -102,12 +102,17 @@ def draw_metallicities_and_redshifts(mets, ns, Ns, sfr_model, sigma_log10Z, z_ma
         ip = np.random.randint(n_bin)
         jp = np.random.randint(ns[ip])
         Zp = np.random.uniform(low=met_bins[ip], high=met_bins[ip + 1])
-
+        
+        if skew:
+            log_Pacc = sfh.log_p_Z_z_skewed(Zp, zp, **kwargs) - sfh.log_p_Z_z(Z, z, **kwargs) + \
+                       np.log(Ns[i]) + np.log(ns[ip]) + np.log(dZs[ip]) - \
+                       (np.log(Ns[ip]) + np.log(ns[i]) + np.log(dZs[i]))
         # log acceptance probability is the difference between the current and next data points
         # Should we be doing Ns, or Ms here? The rates normalize to the M instead of the N?
-        log_Pacc = sfh.log_p_Z_z(Zp, zp, sigma_log10Z) - sfh.log_p_Z_z(Z, z, sigma_log10Z) + \
-                   np.log(Ns[i]) + np.log(ns[ip]) + np.log(dZs[ip]) - \
-                   (np.log(Ns[ip]) + np.log(ns[i]) + np.log(dZs[i]))
+        else:
+            log_Pacc = sfh.log_p_Z_z(Zp, zp, **kwargs) - sfh.log_p_Z_z(Z, z, **kwargs) + \
+                       np.log(Ns[i]) + np.log(ns[ip]) + np.log(dZs[ip]) - \
+                       (np.log(Ns[ip]) + np.log(ns[i]) + np.log(dZs[i]))
 
         if np.log(np.random.rand()) < log_Pacc:
             i = ip
