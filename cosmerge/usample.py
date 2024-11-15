@@ -60,12 +60,12 @@ def draw_metallicities_and_redshifts(mets, ns, Ns, sfr_model, z_max, skew=False,
     sfr_model : str
         Function which returns the star formation rate model
 
-    sigma_log10Z : float
-        Function giving the standard deviation of the metallicity distribution in dex
-        Default : sigma(log10(Z)) = 0.5.
-
     z_max : float
         maximum redshift for star formation
+        
+    skew : bool
+        Whether to use the skewed or unskewed metallicity function.
+        Default : False
 
 
     Returns
@@ -125,8 +125,7 @@ def draw_metallicities_and_redshifts(mets, ns, Ns, sfr_model, z_max, skew=False,
 
 
 def generate_universe(n_sample, n_downsample, mets, M_sim, N_sim,
-                      n_merger, mergers, sfh_model, sigma_log10Z=0.5,
-                      z_max=15):
+                      n_merger, mergers, sfh_model, z_max=15, **kwargs):
     """Generates a universe of star formation by sampling metallicities and
     redshifts according to the user specified star formation rate model,
     a mean metallicity evolution from Madau & Fragos (2017)
@@ -161,9 +160,6 @@ def generate_universe(n_sample, n_downsample, mets, M_sim, N_sim,
 
     sfh_model : function
         Function which returns the star formation history model
-
-    sigma_log10Z : float
-        Function giving the standard deviation of the metallicity distribution in dex
 
     z_max : float
         maximum redshift for star formation

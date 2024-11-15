@@ -71,7 +71,7 @@ def mean_metal_log_z(z, Zsun=0.017):
     return log_Z
 
 
-def log_p_Z_z(Z, z, sigma_log10Z):
+def log_p_Z_z(Z, z, sigma_log10Z=0.5):
     """Computes the metallicity and redshift log probability
     distribution function assuming a log normal metallicity
     distribution with sigma at each redshift
@@ -86,6 +86,7 @@ def log_p_Z_z(Z, z, sigma_log10Z):
 
     sigma_log10Z : numpy.array
         standard deviation of metallicity in dex (convert to log)
+        Default : sigma(log10(Z)) = 0.5.
 
     Returns
     -------
