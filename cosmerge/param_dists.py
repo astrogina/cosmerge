@@ -8,7 +8,7 @@ from astropy.cosmology import Planck18
 import astropy.units as u
 
 
-def get_dN_dtlb_dV(t_lb):
+def get_dN_dtlb_dV(t_lb, **kwargs):
     """
     Creates a kde of the merger lookback times
     Note that since t_lb has values -inf < t_lb < inf
@@ -26,7 +26,7 @@ def get_dN_dtlb_dV(t_lb):
     dN_dt : scipy.stats.gaussian_kde
         a kde which evaluates the pdf: dN/(dt_lb dV_com)
     """
-    p_t_lb = gaussian_kde(t_lb)
+    p_t_lb = gaussian_kde(t_lb, **kwargs)
 
     def dN_dt(t):
         return p_t_lb(t)
@@ -34,7 +34,7 @@ def get_dN_dtlb_dV(t_lb):
     return dN_dt
 
 
-def get_dN_dtlb_dlnm_dV(t_lb, m):
+def get_dN_dtlb_dlnm_dV(t_lb, m, **kwargs):
     """
     Creates a kde of the merger lookback times and masses
     Note that since t_lb has values -inf < t_lb < inf
@@ -59,7 +59,7 @@ def get_dN_dtlb_dlnm_dV(t_lb, m):
     """
 
     t, lnm = np.broadcast_arrays(t_lb, np.log(m))
-    p_tlb_lnm = gaussian_kde(np.vstack([t, lnm]))
+    p_tlb_lnm = gaussian_kde(np.vstack([t, lnm]), **kwargs)
 
     def dN_d_t_lnm(t_eval, m_eval):
         # set up the kde to evaluate properly with easy to use inputs
@@ -73,7 +73,7 @@ def get_dN_dtlb_dlnm_dV(t_lb, m):
     return dN_d_t_lnm
 
 
-def get_dN_dtlb_dlnm_dq_dV(t_lb, m, q):
+def get_dN_dtlb_dlnm_dq_dV(t_lb, m, q, **kwargs):
     """
     Creates a kde of the merger lookback times, masses,
     and mass ratios
@@ -103,7 +103,7 @@ def get_dN_dtlb_dlnm_dq_dV(t_lb, m, q):
     """
 
     t, lnm, logitq = np.broadcast_arrays(t_lb, np.log(m), logit(q))
-    p_tlb_lnm_logitq = gaussian_kde(np.vstack([t, lnm, logitq]))
+    p_tlb_lnm_logitq = gaussian_kde(np.vstack([t, lnm, logitq]), **kwargs)
 
     def dN_d_t_lnm_logitq(t_eval, m_eval, q_eval):
         # set up the kde to evaluate properly with easy to use inputs
@@ -118,7 +118,7 @@ def get_dN_dtlb_dlnm_dq_dV(t_lb, m, q):
     return dN_d_t_lnm_logitq
 
 
-def get_dN_dtlb_dlnm1_dlnm2_dV(t_lb, m1, m2):
+def get_dN_dtlb_dlnm1_dlnm2_dV(t_lb, m1, m2, **kwargs):
     """
     Creates a kde of the merger lookback times, masses,
     and mass ratios
@@ -148,7 +148,7 @@ def get_dN_dtlb_dlnm1_dlnm2_dV(t_lb, m1, m2):
     """
 
     t, lnm1, lnm2 = np.broadcast_arrays(t_lb, np.log(m1), np.log(m2))
-    p_tlb_lnm1_lnm2 = gaussian_kde(np.vstack([t, lnm1, lnm2]))
+    p_tlb_lnm1_lnm2 = gaussian_kde(np.vstack([t, lnm1, lnm2]), **kwargs)
 
     def dN_d_t_lnm1_lnm2(t_eval, m1_eval, m2_eval):
         # set up the kde to evaluate properly with easy to use inputs
@@ -163,7 +163,7 @@ def get_dN_dtlb_dlnm1_dlnm2_dV(t_lb, m1, m2):
     return dN_d_t_lnm1_lnm2
 
 
-def get_dN_dtlb_dlnm_dZ_dV(t_lb, m, Z):
+def get_dN_dtlb_dlnm_dZ_dV(t_lb, m, Z, **kwargs):
     """
     Creates a kde of the merger lookback times, masses,
     and mass ratios
@@ -193,7 +193,7 @@ def get_dN_dtlb_dlnm_dZ_dV(t_lb, m, Z):
     """
 
     t, lnm, lnZ = np.broadcast_arrays(t_lb, np.log(m), np.log(Z))
-    p_tlb_lnm_lnZ = gaussian_kde(np.vstack([t, lnm, lnZ]))
+    p_tlb_lnm_lnZ = gaussian_kde(np.vstack([t, lnm, lnZ]), **kwargs)
 
     def dN_d_t_lnm_lnZ(t_eval, m_eval, Z_eval):
         # set up the kde to evaluate properly with easy to use inputs
@@ -208,7 +208,7 @@ def get_dN_dtlb_dlnm_dZ_dV(t_lb, m, Z):
     return dN_d_t_lnm_lnZ
 
 
-def get_pz(t_lb, z_max=15):
+def get_pz(t_lb, z_max=15, **kwargs):
     """
     Creates a pdf which predicts the probability of merger redshifts
     based on the rate at the detector per redshift: dN_dz_dtd
@@ -233,7 +233,7 @@ def get_pz(t_lb, z_max=15):
     ts = Planck18.lookback_time(zs).to(u.Myr).value
 
     # Get the comoving merger rate kde
-    dN_dts_dV = get_dN_dtlb_dV(t_lb)
+    dN_dts_dV = get_dN_dtlb_dV(t_lb, **kwargs)
 
     # Set up the Jacobian to go from source frame lookback time
     # to redshift measured at the detector

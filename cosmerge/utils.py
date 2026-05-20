@@ -223,7 +223,7 @@ def read_met_data(path, kstar_1, kstar_2, met_grid, SFstart=13700.0, SFduration=
 def get_cosmic_data(path, kstar_1, kstar_2, mets,
                     SFstart=13700.0, SFduration=0.0, pessimistic_cut=False,
                     CE_cool_filter=False, CE_cut=False, SMT_cut=False,
-                    kstar_1_select=None, kstar_2_select=None):
+                    kstar_1_select=None, kstar_2_select=None, use_tqdm=False):
     """
     Reads in all COSMIC data for specified metallicity grid
 
@@ -296,7 +296,10 @@ def get_cosmic_data(path, kstar_1, kstar_2, mets,
     Ms = []
     ns = []
     dat = []
-    for m in tqdm.tqdm(mets):
+
+    if use_tqdm:
+        mets = tqdm.tqdm(mets)
+    for m in mets:
         d, N, M = read_met_data(path, kstar_1, kstar_2, m, SFstart=SFstart, SFduration=SFduration,
                                 pessimistic_cut=pessimistic_cut, CE_cool_filter=CE_cool_filter,
                                 CE_cut=CE_cut, SMT_cut=SMT_cut,
