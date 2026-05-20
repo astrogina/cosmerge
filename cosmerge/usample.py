@@ -32,7 +32,7 @@ def md_zs(sfr_model, z_max):
     """
     zs = np.expm1(np.linspace(np.log(1), np.log(1 + z_max), 1024))
     pzs = sfr_model(zs) * Planck18.lookback_time_integrand(zs) * Planck18.hubble_time.to(u.yr).value
-    czs = integrate.cumtrapz(pzs, zs, initial=0)  # Cumulative distribution which integrates to 1
+    czs = integrate.cumulative_trapezoid(pzs, zs, initial=0)  # Cumulative distribution which integrates to 1
 
     while True:
         redshifts = np.interp(np.random.uniform(low=0, high=czs[-1]), czs, zs)
@@ -128,7 +128,7 @@ def draw_metallicities_and_redshifts(mets, ns, Ns, sfr_model, sigma_log10Z, skew
 
 
 def generate_universe(n_sample, n_downsample, mets, M_sim, N_sim,
-                      n_merger, mergers, sfh_model, skew, sigma_log10Z, z_max):
+                      n_merger, mergers, sfh_model, skew, sigma_log10Z, z_max, use_tqdm=False):
     """Generates a universe of star formation by sampling metallicities and
     redshifts according to the user specified star formation rate model,
     a mean metallicity evolution from Madau & Fragos (2017)
@@ -189,10 +189,16 @@ def generate_universe(n_sample, n_downsample, mets, M_sim, N_sim,
     # j_s: bbh merger indices
     # z_s: formation redshifts
     # Z_s: metallicities
-    ibins, j_s, z_s, Z_s = zip(*[x for (x, i) in
+    if use_tqdm:
+        ibins, j_s, z_s, Z_s = zip(*[x for (x, i) in
                                  zip(draw_metallicities_and_redshifts(mets, n_merger, N_sim, sfh_model, sigma_log10Z, skew, z_max),
                                      tqdm.tqdm(range(n_sample))) if
                                  i % n_downsample == 0])
+    else:
+        ibins, j_s, z_s, Z_s = zip(*[x for (x, i) in
+                                    zip(draw_metallicities_and_redshifts(mets, n_merger, N_sim, sfh_model, sigma_log10Z, skew, z_max),
+                                        range(n_sample)) if
+                                    i % n_downsample == 0])
     # we want all of these indices to be in arrays to do array manipulation later
     ibins = np.array(ibins)
     j_s = np.array(j_s)
@@ -208,7 +214,11 @@ def generate_universe(n_sample, n_downsample, mets, M_sim, N_sim,
 
     dat = []
     # loop through our metallicity grid for easy COSMIC data access
-    for ii in tqdm.tqdm(range(len(mets))):
+    if use_tqdm:
+        array = tqdm.tqdm(range(len(mets)))
+    else: 
+        array = range(len(mets))
+    for ii in array:
         # select all the formation redshift and metallicities in that bin
         met_mask = ibins == ii
         if len(met_mask[met_mask]) > 0:
