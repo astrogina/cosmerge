@@ -123,10 +123,12 @@ class Catalog():
                                                    z_max=z_max)
 
         z = np.expm1(np.linspace(0, np.log1p(z_max), 1000))
+
+        # This is a metallicity-weighted average mass / merger (mass simulated / number of mergers)
         M_merger = np.mean(self.M_sim[ibins] / self.n_merger[ibins])
 
         # divide by 1e6 because COSMIC time is in Myr
-        M_star_U = np.trapz(self.sfh_model(z).to(u.Msun * u.yr**(-1) * u.Gpc**(-3)).value,
+        M_star_U = np.trapezoid(self.sfh_model(z).to(u.Msun * u.yr**(-1) * u.Gpc**(-3)).value,
                             Planck18.lookback_time(z).to(u.yr).value)/1e6
 
         norm_fac = M_star_U / M_merger
